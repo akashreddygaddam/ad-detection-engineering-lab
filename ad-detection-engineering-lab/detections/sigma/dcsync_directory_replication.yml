@@ -1,0 +1,21 @@
+title: Potential Directory Replication Rights Abuse
+id: 2f15f8d4-1eaf-4cb1-9f50-7e9a3b4c1002
+status: experimental
+description: Flags directory object access events for analyst review; validate control-access GUIDs and approved replication principals in your environment.
+author: Akash Reddy (akashreddygaddam)
+date: 2026/11/11
+references:
+  - https://attack.mitre.org/techniques/T1003/006/
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4662
+  condition: selection
+falsepositives:
+  - Approved domain controllers, backup, or identity synchronization services
+level: medium
+tags:
+  - attack.credential_access
+  - attack.t1003.006

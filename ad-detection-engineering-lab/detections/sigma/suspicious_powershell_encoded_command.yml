@@ -1,0 +1,25 @@
+title: PowerShell Encoded Command Execution
+id: 2f15f8d4-1eaf-4cb1-9f50-7e9a3b4c1003
+status: experimental
+description: Detects PowerShell process command lines containing common encoded-command switches; review parent process and user context.
+author: Akash Reddy (akashreddygaddam)
+date: 2026/11/11
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith:
+      - '\\powershell.exe'
+      - '\\pwsh.exe'
+  selection_encoded:
+    CommandLine|contains:
+      - ' -enc '
+      - ' -encodedcommand '
+  condition: selection_image and selection_encoded
+falsepositives:
+  - Approved automation that uses encoded PowerShell
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059.001
