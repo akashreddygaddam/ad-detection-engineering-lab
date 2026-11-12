@@ -1,31 +1,66 @@
-import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
-MODULE_PATH = Path(__file__).parents[1] / "src" / "analyze_events.py"
-spec = importlib.util.spec_from_file_location("analyze_events", MODULE_PATH)
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 
-class DetectionTests(unittest.TestCase):
-    def test_kerberos_ticket_event_is_reviewed(self):
-        result = module.analyze({"event_id": 4769})
-        self.assertTrue(any("Kerberos" in message for _, message in result))
+from analyze_events import analyze_events, load_events
 
-    def test_replication_like_event_is_high(self):
-        result = module.analyze({"event_id": 4662, "access_mask": "0x100"})
-        self.assertEqual(result[0][0], "HIGH")
 
-    def test_encoded_powershell_is_flagged(self):
-        result = module.analyze({
-            "event_id": 1,
-            "image": r"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-            "command_line": "powershell.exe -EncodedCommand AAA="
-        })
-        self.assertTrue(any("encoded-command" in message for _, message in result))
+class TestDetectionEngine(unittest.TestCase):
 
-    def test_unrelated_event_is_quiet(self):
-        self.assertEqual(module.analyze({"event_id": 4624}), [])
+    def test_sample_events_generate_alerts(self):
+        events = load_events(ROOT / "data" / "sample_events.jsonl")
+        results = analyze_events(events)
+
+        self.assertEqual(len(results), 3)
+
+    def test_kerberoasting_detection(self):
+        event = [{
+            "EventID": 4769,
+            "TargetUserName": "svc_backup",
+            "RequestCount": 38
+        }]
+
+        results = analyze_events(event)
+
+        self.assertTrue(any("Kerberoasting" in r for r in results))
+
+    def test_dcsync_detection(self):
+        event = [{
+            "EventID": 4662,
+            "SubjectUserName": "user_ops",
+            "Properties": "Replication-Get-Changes"
+        }]
+
+        results = analyze_events(event)
+
+        self.assertTrue(any("DCSync" in r for r in results))
+
+    def test_powershell_detection(self):
+        event = [{
+            "EventID": 1,
+            "Image": "C:\\Windows\\System32\\powershell.exe",
+            "CommandLine": "powershell.exe -EncodedCommand TEST",
+            "Computer": "WS-TEST01"
+        }]
+
+        results = analyze_events(event)
+
+        self.assertTrue(any("PowerShell" in r for r in results))
+
+    def test_normal_event_no_alert(self):
+        event = [{
+            "EventID": 4769,
+            "TargetUserName": "normal_user",
+            "RequestCount": 1
+        }]
+
+        results = analyze_events(event)
+
+        self.assertEqual(results, [])
+
 
 if __name__ == "__main__":
     unittest.main()
