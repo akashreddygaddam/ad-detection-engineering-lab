@@ -317,13 +317,28 @@ python -m unittest discover -s tests -v
 ---
 
 ## 📸 Screenshots & Evidence
-### Python Detection Engine Results
 
-The Python detection engine successfully analyzed six synthetic Windows events and generated three illustrative security alerts.
+### Python Detection Engine Execution
 
-![Detection Engine Results](screenshots/detection-engine-results.png)
+The Python detection engine successfully analyzed six synthetic Windows security events and generated three illustrative security alerts.
 
-Screenshots will document the actual implementation and testing process.
+The detected scenarios include:
+
+- Kerberoasting activity
+- DCSync activity
+- Suspicious PowerShell execution
+
+![Python Detection Engine Results](screenshots/detection-engine-results.png)
+
+### Automated Testing Results
+
+The detection engine was tested using Python's built-in unittest framework.
+
+- Total automated tests: 5
+- Passed: 5
+- Failed: 0
+
+All five tests completed successfully.
 
 Planned evidence:
 
