@@ -1,0 +1,29 @@
+title: Potential Kerberoasting Activity
+id: 7b4ecae8-3e36-4b4f-b88c-44f6b66b65c1
+status: experimental
+description: Detects Kerberos service ticket requests for investigation.
+author: Akash Reddy
+date: 2026/11/12
+
+references:
+    - https://attack.mitre.org/techniques/T1558/003/
+
+tags:
+    - attack.credential_access
+    - attack.t1558.003
+
+logsource:
+    product: windows
+    service: security
+
+detection:
+    selection:
+        EventID: 4769
+
+    condition: selection
+
+falsepositives:
+    - Normal service account activity
+    - Legitimate administrative operations
+
+level: medium
