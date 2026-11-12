@@ -1,90 +1,379 @@
-# Active Directory Threat Detection Engineering Lab
+# 🛡️ Active Directory Detection Engineering Lab
 
-**Author:** `akashreddygaddam`  
-**Status:** Portfolio lab — synthetic telemetry and detection content  
-**Focus:** Blue Team · SOC Analysis · Detection Engineering · MITRE ATT&CK
+### Enterprise Active Directory Attack Simulation, Threat Detection & Incident Response
 
-> **Transparency note:** This repository is a reproducible, documentation-led lab scaffold. The included events are synthetic examples; they were not collected from a live Active Directory domain, and no attacks were executed against real systems. Replace the sample evidence with results from your own isolated lab before describing the work as hands-on validation.
+![Platform](https://img.shields.io/badge/Platform-Windows-blue)
+![Security](https://img.shields.io/badge/Domain-Cybersecurity-red)
+![Focus](https://img.shields.io/badge/Focus-Blue%20Team-blue)
+![Detection](https://img.shields.io/badge/Detection-SIEM%20%7C%20Sigma-green)
+![Status](https://img.shields.io/badge/Project-Portfolio%20Lab-orange)
 
-## Overview
+A hands-on cybersecurity project focused on identifying, detecting, investigating, and responding to suspicious activities within a Microsoft Active Directory environment.
 
-This project demonstrates how a defender can reason about common Active Directory attack patterns, map them to telemetry, write detections, and document an investigation. It focuses on:
+This project explores common enterprise identity attacks and demonstrates how defenders can use Windows security logs, detection engineering, Python, Sigma rules, and SIEM concepts to identify potential threats.
 
-- Kerberoasting — MITRE ATT&CK `T1558.003`
-- DCSync — `T1003.006`
-- Suspicious PowerShell execution — `T1059.001`
-- Remote service / lateral movement indicators — `T1021` (context-dependent)
+---
 
-The repository includes sample Windows Security event records, Sigma-style detection rules, a Python validator for the sample dataset, an investigation playbook, and a detection coverage matrix.
+## 📑 Table of Contents
 
-## Repository layout
+- Project Overview
+- Objectives
+- Technologies & Tools
+- Lab Architecture
+- Attack Scenarios
+- Detection Engineering
+- MITRE ATT&CK Mapping
+- Investigation & Response
+- Project Structure
+- Installation
+- Execution
+- Screenshots & Evidence
+- Learning Outcomes
+- Future Improvements
+- Author
+- License
+
+---
+
+## 🎯 Project Overview
+
+Active Directory is widely used in enterprise environments to manage users, computers, authentication, and access permissions.
+
+Attackers who compromise an Active Directory environment may attempt to steal credentials, abuse privileges, move laterally, and access sensitive domain information.
+
+This project focuses on the defensive side of Active Directory security.
+
+The objective is to understand how suspicious activities generate security events and how detection mechanisms can identify potentially malicious behavior.
+
+The project follows a Blue Team security workflow:
+
+**Attack Simulation → Log Collection → Threat Detection → Alert Investigation → Incident Response**
+
+---
+
+## 🎯 Project Objectives
+
+- Understand Active Directory security architecture.
+- Explore common enterprise identity attacks.
+- Identify suspicious Windows security events.
+- Develop detection rules using Sigma.
+- Build Python-based event analysis capabilities.
+- Map detections to MITRE ATT&CK.
+- Investigate suspicious authentication and process activity.
+- Understand SOC analyst investigation workflows.
+
+---
+
+## 🧰 Technologies & Tools
+
+| Technology | Purpose |
+|---|---|
+| Windows Server | Active Directory environment |
+| Windows 10/11 | Endpoint testing |
+| Active Directory | Identity and access management |
+| PowerShell | Windows administration and telemetry |
+| Sysmon | Endpoint activity monitoring |
+| Windows Event Viewer | Security event investigation |
+| Python | Event analysis and detection logic |
+| Sigma | Detection rule development |
+| Splunk / SIEM concepts | Security monitoring and analysis |
+| MITRE ATT&CK | Threat behavior classification |
+| VirtualBox / VMware | Isolated virtual lab |
+
+*The table describes the intended lab technology stack. Only tools actually installed and tested should be reported as implemented.*
+
+---
+
+## 🏗️ Lab Architecture
+
+The intended environment consists of a Windows Server domain controller and Windows client machines connected through an isolated virtual network.
 
 ```text
-.
-├── README.md
-├── docs/
-│   ├── architecture.md
-│   ├── investigation-playbook.md
-│   └── detection-matrix.md
-├── detections/
-│   ├── sigma/
-│   │   ├── kerberoasting_ticket_volume.yml
-│   │   ├── dcsync_directory_replication.yml
-│   │   └── suspicious_powershell_encoded_command.yml
-│   └── README.md
-├── data/
-│   └── sample_events.jsonl
-├── src/
-│   └── analyze_events.py
-├── tests/
-│   └── test_analyze_events.py
-├── requirements.txt
-└── LICENSE
+             ACTIVE DIRECTORY LAB
+                      |
+          +-----------+-----------+
+          |                       |
+     Windows Server          Windows Client
+     Domain Controller       Endpoint
+          |                       |
+          +-----------+-----------+
+                      |
+               Security Events
+                      |
+          +-----------+-----------+
+          |                       |
+      Windows Logs              Sysmon
+          |                       |
+          +-----------+-----------+
+                      |
+               Log Collection
+                      |
+               Detection Engine
+                      |
+             +--------+--------+
+             |                 |
+          Sigma Rules       Python
+             |                 |
+             +--------+--------+
+                      |
+               Security Alerts
+                      |
+                Investigation
+                      |
+                Incident Response
 ```
 
-## Quick start
+---
 
-Requires Python 3.10+; no third-party packages are required.
+## 🚨 Attack Scenarios
+
+The project focuses on four important enterprise security scenarios.
+
+### 1. Kerberoasting
+
+**MITRE ATT&CK: T1558.003**
+
+Kerberoasting is an Active Directory attack technique involving the extraction of Kerberos service tickets for offline password-cracking attempts.
+
+Detection focus:
+- Unusual Kerberos service-ticket requests.
+- Suspicious service account activity.
+- Unusual ticket-request patterns.
+- Windows Security Event ID 4769.
+
+### 2. DCSync Attack
+
+**MITRE ATT&CK: T1003.006**
+
+DCSync abuses directory replication permissions to request sensitive credential information from a domain controller.
+
+Detection focus:
+- Suspicious directory replication activity.
+- Unexpected accounts requesting replication.
+- Abnormal directory access permissions.
+- Windows Security Event ID 4662.
+
+### 3. Suspicious PowerShell Activity
+
+**MITRE ATT&CK: T1059.001**
+
+PowerShell can be abused by attackers to execute commands, download files, and perform malicious administrative activities.
+
+Detection focus:
+- Encoded PowerShell commands.
+- Suspicious command-line arguments.
+- Unusual parent-child process relationships.
+- Sysmon Event ID 1.
+- PowerShell Event ID 4104.
+
+### 4. Lateral Movement
+
+**MITRE ATT&CK: T1021**
+
+Lateral movement involves accessing additional systems within an environment after obtaining an initial foothold.
+
+Detection focus:
+- Unexpected remote logons.
+- Suspicious service creation.
+- Unusual administrative account usage.
+- Windows Security Event ID 4624.
+- System Event ID 7045.
+
+---
+
+## 🔍 Detection Engineering
+
+The project uses detection logic to identify suspicious activity from Windows telemetry.
+
+Detection engineering involves:
+
+1. Understanding the attack behavior.
+2. Identifying relevant security events.
+3. Developing detection logic.
+4. Testing against representative events.
+5. Investigating potential false positives.
+6. Improving detection accuracy.
+
+### Detection Technologies
+
+**Sigma Rules**
+
+Portable detection rules designed to describe suspicious activity across supported SIEM platforms.
+
+**Python Detection Engine**
+
+A Python-based utility for parsing event data and identifying selected suspicious patterns.
+
+**Windows Event Logs**
+
+Security and system events provide important information about authentication, directory access, and system activity.
+
+---
+
+## 🧭 MITRE ATT&CK Mapping
+
+| Attack Technique | Technique ID | Detection Source |
+|---|---|---|
+| Kerberoasting | T1558.003 | Event ID 4769 |
+| DCSync | T1003.006 | Event ID 4662 |
+| PowerShell | T1059.001 | Sysmon / PowerShell logs |
+| Remote Services | T1021 | Windows logon and service events |
+
+---
+
+## 🕵️ Investigation & Incident Response
+
+When a detection generates an alert, the investigation process includes:
+
+1. Identify the affected account.
+2. Identify the affected endpoint.
+3. Review timestamps and event details.
+4. Correlate related security events.
+5. Determine whether the behavior is legitimate or suspicious.
+6. Identify potential impact.
+7. Document investigation findings.
+8. Recommend appropriate containment and remediation.
+
+---
+
+## 📂 Project Structure
+
+```text
+ad-detection-engineering-lab/
+│
+├── README.md
+├── LICENSE
+├── .gitignore
+│
+├── screenshots/
+│
+├── detections/
+│   ├── README.md
+│   └── sigma/
+│       ├── kerberoasting.yml
+│       ├── dcsync.yml
+│       └── suspicious-powershell.yml
+│
+├── data/
+│   └── sample_events.jsonl
+│
+├── src/
+│   └── analyze_events.py
+│
+├── docs/
+│   ├── architecture.md
+│   ├── detection-matrix.md
+│   └── investigation-playbook.md
+│
+└── tests/
+    └── test_analyze_events.py
+```
+
+---
+
+## ⚙️ Installation
+
+### Requirements
+
+- Python 3.10+
+- Git
+- Windows environment for collecting Windows telemetry
+- Optional isolated virtual machines for Active Directory testing
+
+### Clone Repository
 
 ```bash
 git clone https://github.com/akashreddygaddam/ad-detection-engineering-lab.git
-cd ad-detection-engineering-lab
-python src/analyze_events.py data/sample_events.jsonl
-python -m unittest discover -s tests -v
 ```
 
-Expected output includes alerts for the synthetic DCSync-like event, suspicious PowerShell, and Kerberos service-ticket activity. Threshold-based detections are illustrative and must be tuned to the environment.
+```bash
+cd ad-detection-engineering-lab
+```
 
-## Detection logic
+### Install Dependencies
 
-| Use case | Primary telemetry | ATT&CK | Investigation focus |
-|---|---|---|---|
-| Kerberoasting signal | Security Event ID 4769 | T1558.003 | Unusual volume of service-ticket requests, encryption type, requesting account, target SPNs |
-| DCSync signal | Security Event ID 4662 | T1003.006 | Replication control-access rights, subject identity, source host, approved DCs |
-| Encoded PowerShell | Sysmon Event ID 1 / process command line | T1059.001 | Parent process, user, command-line content, script block logs, host context |
-| Remote service activity | Security 4624 / 7045 / Sysmon 1 | T1021 (context-dependent) | Logon type, source host, service creation, admin context, change window |
+```bash
+pip install -r requirements.txt
+```
 
-## Validation
+---
 
-The Python analyzer uses deliberately small, transparent heuristics against the included JSONL examples. It is not a SIEM and does not replace Sigma execution, event normalization, baselining, or analyst review.
+## ▶️ Execution
+
+Run the Python event analyzer:
 
 ```bash
 python src/analyze_events.py data/sample_events.jsonl
+```
+
+Run automated tests:
+
+```bash
 python -m unittest discover -s tests -v
 ```
 
-## Safe lab design
+*The included sample data and output must be clearly identified as synthetic unless replaced with actual lab-generated telemetry.*
 
-Use an isolated virtual network with disposable Windows Server and Windows client VMs. Do not run attack simulations against production or third-party systems. Keep snapshots, use test identities, and ensure the lab has no route to sensitive networks.
+---
 
-See [architecture](docs/architecture.md) and [investigation playbook](docs/investigation-playbook.md).
+## 📸 Screenshots & Evidence
 
-## Attribution and scope
+Screenshots will document the actual implementation and testing process.
 
-This is an independently authored learning scaffold inspired by common Active Directory defense and detection-engineering practices. It is not a copy of another repository. If you adapt material, diagrams, code, or text from another project, preserve its license and provide clear attribution.
+Planned evidence:
 
-## Author
+- Active Directory lab configuration.
+- Windows Security Event Viewer.
+- Sysmon event collection.
+- Sigma detection rules.
+- Python detection engine execution.
+- Detection and investigation results.
+
+Screenshots will be added after the corresponding activities are performed.
+
+---
+
+## 📚 Learning Outcomes
+
+Through this project, the following cybersecurity concepts are explored:
+
+- Active Directory security.
+- Windows event monitoring.
+- Enterprise identity attacks.
+- Threat detection engineering.
+- Sigma detection rules.
+- Python security automation.
+- MITRE ATT&CK framework.
+- SOC alert investigation.
+- Incident response fundamentals.
+
+---
+
+## 🚀 Future Improvements
+
+- Integrate Splunk or another SIEM platform.
+- Add additional Active Directory attack detections.
+- Improve Python detection capabilities.
+- Implement automated alert generation.
+- Add Windows Event Forwarding.
+- Develop detection dashboards.
+- Validate rules against real lab-generated telemetry.
+- Document false-positive testing and detection tuning.
+
+---
+
+## 👨‍💻 Author
+
+**Akash Reddy**
 
 GitHub: [@akashreddygaddam](https://github.com/akashreddygaddam)
 
-Add your own lab screenshots, sanitized event exports, detection test results, and lessons learned here after you perform the validation. Do not claim detections were tested against a live environment until you have done so.
+Project: Active Directory Detection Engineering Lab
+
+This repository is maintained as an independent cybersecurity learning and portfolio project.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
