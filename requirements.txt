@@ -1,1 +1,3 @@
-# No third-party dependencies required (Python 3.10+).
+# Active Directory Detection Engineering Lab
+# No external Python packages required.
+# Uses Python standard library.
