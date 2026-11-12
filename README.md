@@ -317,6 +317,11 @@ python -m unittest discover -s tests -v
 ---
 
 ## 📸 Screenshots & Evidence
+### Python Detection Engine Results
+
+The Python detection engine successfully analyzed six synthetic Windows events and generated three illustrative security alerts.
+
+![Detection Engine Results](screenshots/detection-engine-results.png)
 
 Screenshots will document the actual implementation and testing process.
 
