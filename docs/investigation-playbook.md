@@ -1,42 +1,150 @@
-# Investigation Playbook
+# Active Directory Security Investigation Playbook
 
-## 1. Kerberoasting signal
+## 1. Overview
 
-**Trigger:** A user account requests an unusual number of service tickets (Event ID 4769), especially for multiple SPNs or with unexpected encryption characteristics.
+This playbook describes the investigation process for suspicious activities detected within an Active Directory environment.
 
-**Triage**
-1. Identify the requesting account, client address, target SPNs, and time window.
-2. Compare request volume with the account's historical baseline.
-3. Confirm whether the source host and activity align with an approved administrative or application workflow.
-4. Review adjacent authentication events and endpoint process telemetry.
-5. Escalate if activity is anomalous and unexplained; preserve relevant logs.
+The objective is to provide a structured approach for SOC analysts to identify suspicious behavior, correlate security events, investigate potential threats, and recommend appropriate incident response actions.
 
-**False-positive considerations:** Service discovery, application pools, scheduled jobs, and legitimate service-account management can create ticket activity.
+## 2. Investigation Workflow
 
-## 2. DCSync signal
+The investigation process follows these stages:
 
-**Trigger:** Directory replication rights are exercised by a principal or host that is not an approved domain controller or authorized identity-management system.
+1. Alert identification.
+2. Event verification.
+3. Account investigation.
+4. Endpoint investigation.
+5. Event correlation.
+6. Threat assessment.
+7. Incident documentation.
+8. Response and remediation.
 
-**Triage**
-1. Review Event ID 4662 and the subject SID/account.
-2. Inspect access mask and replication-related control-access rights.
-3. Validate the source host against the approved domain-controller inventory.
-4. Correlate with logons (4624), process creation (4688/Sysmon 1), and recent privilege changes.
-5. Treat unexplained replication activity as high priority; follow the organization's incident response process.
+## 3. Scenario 1: Kerberoasting Investigation
 
-**False-positive considerations:** Backup, identity synchronization, and directory recovery products may legitimately use replication permissions. Maintain an explicit allowlist and review it regularly.
+**MITRE ATT&CK:** T1558.003
 
-## 3. Suspicious PowerShell
+**Primary Event ID:** 4769
 
-**Trigger:** PowerShell launched with encoded or obfuscated command-line arguments, especially from an unusual parent process or user context.
+### Investigation Steps
 
-**Triage**
-1. Capture full command line, parent process, user, host, and timestamp.
-2. Review PowerShell script-block logs if enabled.
-3. Determine whether the command is approved automation or interactive administration.
-4. Correlate with network, file, and authentication events.
-5. Preserve evidence and contain only according to authorized response procedures.
+- Identify the account requesting Kerberos service tickets.
+- Review the requesting computer and source IP.
+- Examine the requested service principal names.
+- Identify unusual ticket-request patterns.
+- Compare activity against normal account behavior.
+- Investigate related authentication events.
 
-## Evidence template
+### Important Questions
 
-For each real lab test, record: test ID, date/time (UTC), lab topology, telemetry source, event IDs, query/rule version, expected result, actual result, false-positive notes, screenshots (sanitized), and cleanup confirmation.
+- Is the requesting account expected to access these services?
+- Is the request volume unusual?
+- Is the source computer authorized?
+- Are there additional suspicious authentication events?
+
+### Recommended Response
+
+Escalate suspicious activity for identity-security investigation. Review affected service accounts and follow approved credential-protection procedures.
+
+## 4. Scenario 2: DCSync Investigation
+
+**MITRE ATT&CK:** T1003.006
+
+**Primary Event ID:** 4662
+
+### Investigation Steps
+
+- Identify the account performing directory access.
+- Review replication-related access rights.
+- Identify the source system.
+- Verify whether the account is authorized.
+- Review related privileged logons.
+- Correlate other directory access events.
+
+### Important Questions
+
+- Is the account authorized for directory replication?
+- Did the request originate from an approved domain controller?
+- Are unexpected replication permissions present?
+- Is there evidence of privilege misuse?
+
+### Recommended Response
+
+Escalate unexplained directory replication activity as a high-priority identity-security incident.
+
+## 5. Scenario 3: Suspicious PowerShell Investigation
+
+**MITRE ATT&CK:** T1059.001
+
+**Primary Events:** Sysmon 1 and PowerShell 4104
+
+### Investigation Steps
+
+- Review the PowerShell command line.
+- Identify the user and endpoint.
+- Examine the parent process.
+- Review script-block logging.
+- Investigate related process creation events.
+- Examine network and file activity.
+
+### Important Questions
+
+- Was the command encoded or obfuscated?
+- Was PowerShell launched by an unusual process?
+- Is the user authorized to execute the script?
+- Is there evidence of suspicious follow-on activity?
+
+### Recommended Response
+
+Preserve relevant endpoint telemetry and escalate suspicious execution for further investigation.
+
+## 6. Scenario 4: Lateral Movement Investigation
+
+**MITRE ATT&CK:** T1021
+
+**Primary Events:** 4624 and 7045
+
+### Investigation Steps
+
+- Identify source and destination systems.
+- Review the account used for remote access.
+- Examine logon type and timestamps.
+- Review newly installed services.
+- Correlate process creation events.
+- Compare activity with approved administrative operations.
+
+### Important Questions
+
+- Is the remote connection expected?
+- Is the account authorized?
+- Is the installed service legitimate?
+- Are multiple systems involved?
+
+### Recommended Response
+
+Investigate unauthorized remote access and follow the organization's containment and incident-response procedures.
+
+## 7. Investigation Documentation
+
+For every investigation, record:
+
+| Field | Description |
+|---|---|
+| Alert ID | Detection identifier |
+| Timestamp | Time of suspicious activity |
+| Username | Account involved |
+| Hostname | Affected computer |
+| Event ID | Relevant Windows event |
+| Source IP | Origin of activity |
+| Findings | Investigation observations |
+| Severity | Assessed incident severity |
+| Status | Open, investigating, or closed |
+
+## 8. Conclusion
+
+A structured investigation process helps security analysts understand suspicious activities, reduce false positives, and respond effectively to potential Active Directory threats.
+
+---
+
+**Author:** Akash Reddy
+
+**Project:** Active Directory Detection Engineering Lab
