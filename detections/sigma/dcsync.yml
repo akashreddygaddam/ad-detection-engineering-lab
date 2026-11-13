@@ -10,7 +10,6 @@ author: Akash Reddy
 date: 2026/11/12
 
 tags:
-    - attack.credential_access
     - attack.t1003.006
 
 logsource:
