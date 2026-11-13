@@ -1,4 +1,4 @@
-# 🛡️ Active Directory Detection Engineering Lab
+# 🛡️ Active Directory Detection Engineering
 
 ### Enterprise Active Directory Attack Simulation, Threat Detection & Incident Response
 
