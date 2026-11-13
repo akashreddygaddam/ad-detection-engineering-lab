@@ -330,6 +330,19 @@ The detected scenarios include:
 
 ![Python Detection Engine Results](screenshots/detection-engine-results.png)
 
+### Sigma Detection Rule Validation
+
+All three Sigma detection rules were successfully checked using Sigma CLI 4.0.1.
+
+Validation results:
+- Kerberoasting: Passed
+- DCSync: Passed
+- Suspicious PowerShell: Passed
+
+No rule errors, condition errors, or validation issues were reported.
+
+![Sigma Validation Results](screenshots/sigma-validation-results.png)
+
 ### Automated Testing Results
 
 The detection engine was tested using Python's built-in unittest framework.
