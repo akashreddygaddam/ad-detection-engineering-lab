@@ -1,12 +1,12 @@
-title: Suspicious PowerShell Encoded Command
+title: Suspicious Encoded PowerShell Execution
 id: 1e80b8b7-3d40-48d5-87aa-70b3e2b29b67
 status: experimental
-description: Detects encoded PowerShell command execution.
-author: Akash Reddy
-date: 2026/11/12
-
+description: >
+    Detects PowerShell execution containing encoded command arguments.
 references:
     - https://attack.mitre.org/techniques/T1059/001/
+author: Akash Reddy
+date: 2026/11/12
 
 tags:
     - attack.execution
@@ -24,13 +24,14 @@ detection:
 
     selection_command:
         CommandLine|contains:
-            - ' -enc '
-            - ' -encodedcommand '
+            - '-enc '
+            - '-encodedcommand '
 
     condition: selection_image and selection_command
 
 falsepositives:
-    - Legitimate administrative scripts
-    - Software deployment tools
+    - Authorized administrative scripts
+    - Software deployment automation
+    - Legitimate PowerShell automation
 
 level: medium
