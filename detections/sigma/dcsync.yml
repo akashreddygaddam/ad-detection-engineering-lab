@@ -1,12 +1,13 @@
-title: Potential DCSync Activity
+title: Potential DCSync Directory Replication Activity
 id: 90b24f7b-ec1c-4a63-8df4-1a9c3dfbca9f
 status: experimental
-description: Detects directory replication access events for investigation.
-author: Akash Reddy
-date: 2026/11/12
-
+description: >
+    Detects directory replication permissions accessed through
+    Windows Security Event ID 4662.
 references:
     - https://attack.mitre.org/techniques/T1003/006/
+author: Akash Reddy
+date: 2026/11/12
 
 tags:
     - attack.credential_access
@@ -17,13 +18,21 @@ logsource:
     service: security
 
 detection:
-    selection:
+    selection_event:
         EventID: 4662
+        AccessMask: '0x100'
 
-    condition: selection
+    selection_rights:
+        Properties|contains:
+            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+            - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
+            - '89e95b76-444d-4c62-991a-0facbeda640c'
+
+    condition: selection_event and selection_rights
 
 falsepositives:
-    - Legitimate domain controller replication
-    - Approved identity management tools
+    - Authorized domain controller replication
+    - Approved identity management systems
+    - Authorized directory backup operations
 
 level: high
